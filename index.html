@@ -1,0 +1,3039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>螺旋契约 · 命运对决</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0b0620;
+      --bg-mid: #15102e;
+      --layer-green: #2ecc71;
+      --layer-purple: #8e44ad;
+      --layer-gold: #f39c12;
+      --hero-wind: #2ecc71;
+      --hero-shadow: #8e44ad;
+      --hero-ice: #3498db;
+      --hero-flame: #e74c3c;
+      --hero-cat: #f39c12;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff2d95;
+      --text-gold: #ffd700;
+      --text-primary: #f4f1ff;
+      --text-dim: #9a93bd;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'Noto Serif SC', serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 20% 10%, rgba(46, 204, 113, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(142, 68, 173, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(243, 156, 18, 0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #0b0620 0%, #120838 50%, #0b0620 100%);
+      min-height: 100vh;
+    }
+
+    /* ==== 粒子 / 星座背景 ==== */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 15% 20%, #fff, transparent),
+        radial-gradient(1px 1px at 85% 15%, #e0d0ff, transparent),
+        radial-gradient(1px 1px at 45% 80%, #fff, transparent),
+        radial-gradient(2px 2px at 70% 40%, #9f7fff, transparent),
+        radial-gradient(1px 1px at 25% 65%, #fff, transparent),
+        radial-gradient(1px 1px at 95% 55%, #ffd27f, transparent),
+        radial-gradient(2px 2px at 55% 25%, #fff, transparent),
+        radial-gradient(1px 1px at 8% 90%, #b79fff, transparent),
+        radial-gradient(1px 1px at 38% 45%, #fff, transparent),
+        radial-gradient(1px 1px at 62% 72%, #ffd27f, transparent);
+      background-size: 100% 100%;
+      animation: twinkle 6s ease-in-out infinite alternate;
+      opacity: 0.75;
+    }
+    @keyframes twinkle { from { opacity: 0.4; } to { opacity: 0.9; } }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* ==== 顶部标题 ==== */
+    .title-bar {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .game-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 4vw, 46px);
+      font-weight: 900;
+      letter-spacing: 6px;
+      background: linear-gradient(90deg, #f39c12, #ffd700, #f39c12, #ff2d95, #8e44ad);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 5s linear infinite;
+      text-shadow: 0 0 40px rgba(243, 156, 18, 0.3);
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+    .game-subtitle {
+      color: var(--text-dim);
+      letter-spacing: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    /* ==== 通用按钮 ==== */
+    .btn {
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 14px 32px;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      background: linear-gradient(180deg, rgba(243, 156, 18, 0.15), rgba(142, 68, 173, 0.15));
+      color: var(--text-primary);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.25s ease;
+      font-size: 15px;
+      position: relative;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(243, 156, 18, 0.35), inset 0 0 20px rgba(255, 215, 0, 0.15);
+      border-color: var(--text-gold);
+    }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, #f39c12, #e74c3c);
+      border-color: transparent;
+    }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(231, 76, 60, 0.5);
+    }
+    .btn-small { padding: 8px 16px; font-size: 13px; letter-spacing: 1px; }
+
+    /* ==== 视图切换 ==== */
+    .view { display: none; animation: fadeIn 0.5s ease; }
+    .view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ==== 菜单界面 ==== */
+    .menu-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      gap: 32px;
+    }
+    .menu-view.active { display: flex; }
+    .menu-art {
+      width: 260px;
+      height: 260px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spiral-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 215, 0, 0.3);
+      animation: rotate 20s linear infinite;
+    }
+    .spiral-ring.r1 { width: 260px; height: 260px; border-color: rgba(46, 204, 113, 0.35); }
+    .spiral-ring.r2 { width: 200px; height: 200px; border-color: rgba(142, 68, 173, 0.45); animation-direction: reverse; animation-duration: 15s; }
+    .spiral-ring.r3 { width: 140px; height: 140px; border-color: rgba(243, 156, 18, 0.55); animation-duration: 10s; }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    .menu-art-core {
+      font-family: 'Cinzel', serif;
+      font-size: 72px;
+      font-weight: 900;
+      color: var(--text-gold);
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 45, 149, 0.3);
+      z-index: 2;
+    }
+    .menu-desc {
+      text-align: center;
+      max-width: 540px;
+      color: var(--text-dim);
+      line-height: 1.9;
+      font-size: 15px;
+    }
+    .menu-desc strong { color: var(--text-gold); font-weight: 700; }
+
+    /* ==== 英雄选择界面 ==== */
+    .hero-view { padding: 10px 0; }
+    .hero-section {
+      background: rgba(21, 16, 46, 0.7);
+      border: 1px solid rgba(255, 215, 0, 0.15);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .hero-section-title {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 4px;
+      margin-bottom: 18px;
+      font-size: 18px;
+      color: var(--text-gold);
+      border-left: 3px solid currentColor;
+      padding-left: 12px;
+    }
+    .hero-section.p1 .hero-section-title { color: var(--hero-wind); border-color: var(--hero-wind); }
+    .hero-section.p2 .hero-section-title { color: var(--hero-flame); border-color: var(--hero-flame); }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .hero-card {
+      background: linear-gradient(180deg, rgba(35, 25, 70, 0.85), rgba(20, 14, 45, 0.95));
+      border: 1.5px solid rgba(154, 147, 189, 0.3);
+      border-radius: 6px;
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 60%, rgba(255, 215, 0, 0.08) 100%);
+      pointer-events: none;
+    }
+    .hero-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4); }
+    .hero-card.selected {
+      border-color: var(--text-gold);
+      box-shadow: 0 0 0 1px var(--text-gold), 0 8px 24px rgba(255, 215, 0, 0.25);
+    }
+    .hero-card.locked { opacity: 0.35; pointer-events: none; }
+    .hero-icon {
+      font-size: 40px;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+    }
+    .hero-card[data-hero="wind"] .hero-icon { background: radial-gradient(circle, rgba(46,204,113,0.25), transparent 70%); }
+    .hero-card[data-hero="shadow"] .hero-icon { background: radial-gradient(circle, rgba(142,68,173,0.3), transparent 70%); }
+    .hero-card[data-hero="ice"] .hero-icon { background: radial-gradient(circle, rgba(52,152,219,0.3), transparent 70%); }
+    .hero-card[data-hero="flame"] .hero-icon { background: radial-gradient(circle, rgba(231,76,60,0.3), transparent 70%); }
+    .hero-card[data-hero="cat"] .hero-icon { background: radial-gradient(circle, rgba(243,156,18,0.3), transparent 70%); }
+
+    .hero-name {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .hero-quote {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      font-style: italic;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    .hero-skills-list {
+      border-top: 1px dashed rgba(154, 147, 189, 0.25);
+      padding-top: 10px;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+    .skill-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .skill-label {
+      color: var(--text-gold);
+      flex-shrink: 0;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .skill-row.passive .skill-label { color: #b7e5ff; }
+    .skill-row.small .skill-label { color: var(--neon-cyan); }
+    .skill-row.ultimate .skill-label { color: var(--neon-pink); }
+    .skill-desc { color: var(--text-primary); }
+
+    .confirm-bar {
+      text-align: center;
+      margin-top: 20px;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ==== 游戏主界面 ==== */
+    .game-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 960px) { .game-layout { grid-template-columns: 1fr; } }
+
+    /* 顶部状态栏 */
+    .players-bar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+    .player-card {
+      padding: 14px 16px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(154, 147, 189, 0.3);
+      background: linear-gradient(180deg, rgba(21, 16, 46, 0.85), rgba(11, 6, 32, 0.95));
+      position: relative;
+      transition: all 0.3s;
+    }
+    .player-card.active {
+      border-color: var(--text-gold);
+      box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.5), 0 0 24px rgba(255, 215, 0, 0.2);
+    }
+    .player-card.p1 .p-hero-color { color: var(--hero-wind); }
+    .player-card.p2 { text-align: right; }
+    .player-card.p2 .p-hero-color { color: var(--hero-flame); }
+    .p-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .player-card.p2 .p-header { justify-content: flex-end; }
+    .p-tag {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 2px;
+      color: var(--text-gold);
+      font-size: 12px;
+    }
+    .p-hero-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .p-position {
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+    .energy-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .player-card.p2 .energy-row { justify-content: flex-end; }
+    .energy-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+    }
+    .energy-slots {
+      display: inline-flex;
+      gap: 4px;
+    }
+    .energy-slot {
+      width: 22px;
+      height: 18px;
+      border: 1.5px solid rgba(255, 215, 0, 0.3);
+      background: rgba(255, 215, 0, 0.04);
+      border-radius: 3px;
+      transition: all 0.3s;
+    }
+    .energy-slot.filled {
+      background: linear-gradient(180deg, #ffd700, #f39c12);
+      border-color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+    .energy-slot.flash { animation: eflash 0.8s ease; }
+    @keyframes eflash { 50% { transform: scale(1.3); background: #fff; } }
+
+    .skill-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .player-card.p2 .skill-buttons { justify-content: flex-end; }
+    .skill-btn {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid rgba(0, 245, 255, 0.35);
+      background: rgba(0, 245, 255, 0.08);
+      color: var(--neon-cyan);
+      cursor: pointer;
+      border-radius: 3px;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .skill-btn:hover:not(:disabled) { background: rgba(0, 245, 255, 0.2); }
+    .skill-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .skill-btn.ultimate {
+      border-color: rgba(255, 45, 149, 0.55);
+      background: rgba(255, 45, 149, 0.12);
+      color: var(--neon-pink);
+    }
+    .skill-btn.ultimate:hover:not(:disabled) { background: rgba(255, 45, 149, 0.22); }
+    .skill-btn.ready {
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-glow { 50% { box-shadow: 0 0 14px currentColor; } }
+
+    .turn-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      background: rgba(255, 215, 0, 0.08);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 3px;
+      color: var(--text-gold);
+      font-size: 14px;
+    }
+
+    /* ==== 棋盘区域 ==== */
+    .board-panel {
+      background: linear-gradient(180deg, rgba(21, 16, 46, 0.75), rgba(11, 6, 32, 0.95));
+      border: 1px solid rgba(154, 147, 189, 0.25);
+      border-radius: 8px;
+      padding: 24px;
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+    }
+    .board-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(243, 156, 18, 0.12), transparent 50%),
+        radial-gradient(ellipse at 50% 0%, rgba(142, 68, 173, 0.12), transparent 50%);
+      pointer-events: none;
+    }
+    .board-title {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 4px;
+      font-size: 15px;
+      color: var(--text-gold);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* 3D 螺旋棋盘 */
+    .spiral-board {
+      position: relative;
+      perspective: 1400px;
+      perspective-origin: 50% 50%;
+      height: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .board-3d {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transform: rotateX(55deg) rotateZ(-8deg);
+    }
+    .cell {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      border: 1.5px solid rgba(154, 147, 189, 0.4);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      transition: transform 0.4s, box-shadow 0.3s, background 0.3s;
+      background: rgba(35, 25, 70, 0.6);
+      backface-visibility: visible;
+    }
+    .cell.l1 { border-color: rgba(46, 204, 113, 0.55); box-shadow: 0 0 8px rgba(46, 204, 113, 0.15); }
+    .cell.l2 { border-color: rgba(142, 68, 173, 0.65); box-shadow: 0 0 10px rgba(142, 68, 173, 0.2); }
+    .cell.l3 { border-color: rgba(243, 156, 18, 0.75); box-shadow: 0 0 14px rgba(243, 156, 18, 0.25); }
+    .cell .idx {
+      position: absolute;
+      top: 1px;
+      left: 3px;
+      font-size: 9px;
+      color: var(--text-dim);
+      font-family: 'Cinzel', serif;
+    }
+    .cell.special-energy { background: rgba(255, 215, 0, 0.18); }
+    .cell.special-boost { background: rgba(0, 245, 255, 0.15); }
+    .cell.special-trap { background: rgba(231, 76, 60, 0.18); }
+    .cell.special-fog { background: rgba(150, 120, 180, 0.25); }
+    .cell.special-teleport { background: rgba(255, 45, 149, 0.18); }
+    .cell.special-back { background: rgba(52, 152, 219, 0.18); }
+    .cell.start { background: linear-gradient(135deg, rgba(46, 204, 113, 0.4), rgba(46, 204, 113, 0.1)); }
+    .cell.finish {
+      background: radial-gradient(circle, #ffd700, #f39c12);
+      color: #000;
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.6);
+      font-weight: 900;
+      font-size: 20px;
+    }
+    .cell.flame-trail {
+      background: radial-gradient(circle, rgba(231, 76, 60, 0.3), transparent 70%);
+    }
+    .cell.highlight {
+      transform: translateZ(0) scale(1.18) !important;
+      box-shadow: 0 0 22px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+      z-index: 10;
+    }
+    .cell.ice-wall::after {
+      content: '🧊';
+      position: absolute;
+      font-size: 32px;
+      filter: drop-shadow(0 0 8px #3498db);
+    }
+    .cell.ice-wall {
+      background: rgba(52, 152, 219, 0.35);
+      box-shadow: 0 0 14px rgba(52, 152, 219, 0.6);
+    }
+
+    /* 棋子 */
+    .piece {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      z-index: 20;
+      transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1), top 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s;
+      pointer-events: none;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+    }
+    .piece.p1 { background: radial-gradient(circle at 30% 30%, #7ee8a5, var(--hero-wind)); box-shadow: 0 0 12px rgba(46, 204, 113, 0.7); }
+    .piece.p2 { background: radial-gradient(circle at 30% 30%, #ff9a8b, var(--hero-flame)); box-shadow: 0 0 12px rgba(231, 76, 60, 0.7); }
+
+    /* 层级标识 */
+    .layer-tag {
+      position: absolute;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 3px;
+      font-size: 11px;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    .layer-tag.lt-green { color: var(--hero-wind); top: 400px; left: 30px; }
+    .layer-tag.lt-purple { color: var(--hero-shadow); top: 240px; left: 30px; }
+    .layer-tag.lt-gold { color: var(--text-gold); top: 80px; left: 30px; }
+
+    /* ==== 右侧操作面板 ==== */
+    .action-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .panel-card {
+      background: linear-gradient(180deg, rgba(21, 16, 46, 0.85), rgba(11, 6, 32, 0.95));
+      border: 1px solid rgba(154, 147, 189, 0.25);
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 3px;
+      font-size: 13px;
+      color: var(--text-gold);
+      margin-bottom: 10px;
+      border-bottom: 1px dashed rgba(255, 215, 0, 0.2);
+      padding-bottom: 6px;
+    }
+    .rps-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .rps-btn {
+      font-family: 'Noto Serif SC', serif;
+      padding: 14px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      background: linear-gradient(180deg, rgba(35, 25, 70, 0.9), rgba(20, 14, 45, 0.95));
+      border: 1.5px solid rgba(154, 147, 189, 0.35);
+      border-radius: 4px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .rps-btn .rps-emoji { font-size: 26px; }
+    .rps-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      border-color: var(--text-gold);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+    }
+    .rps-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .rps-btn.disabled-choice {
+      text-decoration: line-through;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .status-line {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-gold);
+      letter-spacing: 2px;
+      padding: 6px 0;
+    }
+    .status-line.fog {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* 游戏日志 */
+    .game-log {
+      height: 260px;
+      overflow-y: auto;
+      font-size: 12.5px;
+      line-height: 1.75;
+      padding-right: 6px;
+    }
+    .game-log::-webkit-scrollbar { width: 4px; }
+    .game-log::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, 0.3); border-radius: 2px; }
+    .log-entry {
+      padding: 4px 6px;
+      border-bottom: 1px dashed rgba(154, 147, 189, 0.15);
+      color: var(--text-primary);
+    }
+    .log-entry.special { color: var(--text-gold); font-weight: 700; }
+    .log-entry.win { color: var(--hero-wind); }
+    .log-entry.lose { color: #ff8a80; }
+    .log-entry.skill { color: var(--neon-cyan); }
+    .log-entry.ultimate { color: var(--neon-pink); font-weight: 700; }
+    .log-entry.system { color: var(--text-dim); font-style: italic; }
+    .log-entry .turn-tag {
+      font-family: 'Cinzel', serif;
+      color: var(--text-dim);
+      margin-right: 6px;
+      font-size: 10.5px;
+    }
+
+    /* ==== RPS 对决动画 ==== */
+    .rps-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 6, 32, 0.92);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .rps-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    .rps-arena {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+    }
+    .rps-side {
+      text-align: center;
+      min-width: 180px;
+    }
+    .rps-side-label {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 3px;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .rps-hand {
+      font-size: 120px;
+      transition: transform 0.4s;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    }
+    .rps-side.p1 .rps-hand { filter: drop-shadow(0 0 20px rgba(46, 204, 113, 0.45)); }
+    .rps-side.p2 .rps-hand { filter: drop-shadow(0 0 20px rgba(231, 76, 60, 0.45)); }
+    .rps-vs {
+      font-family: 'Cinzel', serif;
+      font-size: 40px;
+      color: var(--text-gold);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      letter-spacing: 4px;
+    }
+    .rps-result-banner {
+      font-family: 'Cinzel', serif;
+      font-size: 36px;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-align: center;
+      min-height: 50px;
+    }
+    .rps-result-banner.win { color: #7ee8a5; text-shadow: 0 0 30px rgba(46, 204, 113, 0.7); }
+    .rps-result-banner.lose { color: #ff8a80; text-shadow: 0 0 30px rgba(231, 76, 60, 0.7); }
+    .rps-result-banner.draw { color: var(--text-gold); text-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+
+    /* ==== 结算界面 ==== */
+    .result-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 75vh;
+      gap: 24px;
+    }
+    .result-view.active { display: flex; }
+    .result-crown {
+      font-size: 100px;
+      animation: crown-float 3s ease-in-out infinite;
+    }
+    @keyframes crown-float {
+      50% { transform: translateY(-12px); filter: drop-shadow(0 0 30px gold); }
+    }
+    .result-title {
+      font-family: 'Cinzel', serif;
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      background: linear-gradient(90deg, #ffd700, #ff2d95, #ffd700);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s linear infinite;
+    }
+    .result-title.victory { color: var(--text-gold); background: linear-gradient(90deg, #ffd700, #f39c12, #ffd700); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .result-title.defeat { color: #ff8a80; }
+    .result-heroes {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      font-size: 18px;
+    }
+    .result-heroes .vs {
+      font-family: 'Cinzel', serif;
+      color: var(--text-dim);
+      letter-spacing: 4px;
+    }
+
+    /* ==== 特殊格图例 ==== */
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 10px;
+      font-size: 11.5px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-icon {
+      width: 22px; height: 22px;
+      border: 1px solid rgba(154, 147, 189, 0.3);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      background: rgba(21, 16, 46, 0.6);
+      flex-shrink: 0;
+    }
+    .legend-text { color: var(--text-primary); line-height: 1.3; }
+
+    /* 状态提示 badge */
+    .status-badges {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .player-card.p2 .status-badges { justify-content: flex-end; }
+    .badge {
+      font-size: 10.5px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 1px;
+      background: rgba(0, 245, 255, 0.15);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0, 245, 255, 0.35);
+    }
+    .badge.fog { background: rgba(150, 120, 180, 0.2); color: #d4c0ff; border-color: rgba(150, 120, 180, 0.5); }
+    .badge.boost { background: rgba(0, 245, 255, 0.15); color: var(--neon-cyan); border-color: rgba(0, 245, 255, 0.4); }
+    .badge.nine-life { background: rgba(243, 156, 18, 0.15); color: var(--text-gold); border-color: rgba(243, 156, 18, 0.4); }
+    .badge.frozen { background: rgba(52, 152, 219, 0.2); color: #8bc9ef; border-color: rgba(52, 152, 219, 0.5); }
+
+    /* ==== 响应式 ==== */
+    @media (max-width: 720px) {
+      .rps-arena { gap: 20px; flex-direction: column; }
+      .rps-hand { font-size: 80px; }
+      .game-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ==== 顶部工具栏 ==== */
+    .top-bar {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 50;
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      background: rgba(21, 16, 46, 0.8);
+      color: var(--text-gold);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background: rgba(255, 215, 0, 0.15);
+      transform: scale(1.1);
+    }
+    .icon-btn.active {
+      color: var(--neon-pink);
+      border-color: var(--neon-pink);
+    }
+    .icon-btn .badge-dot {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 8px;
+      height: 8px;
+      background: #ff2d95;
+      border-radius: 50%;
+    }
+
+    /* ==== 设置弹窗 ==== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 6, 32, 0.92);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    .modal {
+      width: min(480px, 92vw);
+      background: linear-gradient(180deg, #1a1140, #0f0828);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.1);
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      letter-spacing: 4px;
+      color: var(--text-gold);
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(255, 215, 0, 0.25);
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(154, 147, 189, 0.15);
+    }
+    .setting-row:last-of-type { border-bottom: none; }
+    .setting-label { font-size: 14px; letter-spacing: 1px; }
+    .setting-label small {
+      display: block;
+      color: var(--text-dim);
+      font-size: 11px;
+      margin-top: 3px;
+      letter-spacing: 0;
+    }
+    .setting-value {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .setting-value .val-text {
+      min-width: 40px;
+      text-align: right;
+      font-family: 'Cinzel', serif;
+      color: var(--text-gold);
+      font-size: 13px;
+    }
+    /* 滑块 */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 120px;
+      height: 4px;
+      background: rgba(255, 215, 0, 0.2);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--text-gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+    /* 开关 */
+    .toggle {
+      width: 44px;
+      height: 24px;
+      background: rgba(154, 147, 189, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: all 0.25s;
+    }
+    .toggle.on {
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+    }
+    .toggle.on::after { left: 23px; }
+    /* 难度选择 */
+    .diff-select {
+      display: flex;
+      gap: 4px;
+    }
+    .diff-btn {
+      padding: 5px 10px;
+      border: 1px solid rgba(154, 147, 189, 0.3);
+      background: rgba(21, 16, 46, 0.6);
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+    .diff-btn:hover { border-color: var(--text-gold); color: var(--text-gold); }
+    .diff-btn.active {
+      background: linear-gradient(135deg, #f39c12, #e74c3c);
+      color: #fff;
+      border-color: transparent;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    /* ==== 暂停层 ==== */
+    .pause-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 6, 32, 0.95);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .pause-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    .pause-title {
+      font-family: 'Cinzel', serif;
+      font-size: 48px;
+      letter-spacing: 10px;
+      color: var(--text-gold);
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    }
+    .pause-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ==== 震屏效果 ==== */
+    .shake { animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-6px, 4px); }
+      40% { transform: translate(6px, -4px); }
+      60% { transform: translate(-4px, -2px); }
+      80% { transform: translate(4px, 2px); }
+    }
+
+    /* ==== 技能全屏特效 ==== */
+    .skill-flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+      opacity: 0;
+    }
+    .skill-flash.fire { background: radial-gradient(circle, rgba(231,76,60,0.6), transparent 70%); }
+    .skill-flash.ice { background: radial-gradient(circle, rgba(52,152,219,0.6), transparent 70%); }
+    .skill-flash.wind { background: radial-gradient(circle, rgba(46,204,113,0.6), transparent 70%); }
+    .skill-flash.shadow { background: radial-gradient(circle, rgba(142,68,173,0.7), transparent 70%); }
+    .skill-flash.cat { background: radial-gradient(circle, rgba(243,156,18,0.6), transparent 70%); }
+    .skill-flash.animate { animation: flashFade 0.7s ease; }
+    @keyframes flashFade {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* ==== 漂浮粒子 ==== */
+    .floating-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 90;
+      font-size: 24px;
+      animation: floatUp 1.2s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.5); }
+      50% { opacity: 1; transform: translateY(-40px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
+    }
+
+    /* ==== 统计卡片 ==== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .stat-card {
+      background: rgba(21, 16, 46, 0.7);
+      border: 1px solid rgba(255, 215, 0, 0.15);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-gold);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ==== 英雄详情弹窗 ==== */
+    .hero-detail-modal .hero-big-icon {
+      font-size: 60px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .hero-detail-modal .hero-detail-name {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      text-align: center;
+      letter-spacing: 4px;
+      margin-bottom: 4px;
+    }
+    .hero-detail-modal .hero-detail-quote {
+      text-align: center;
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .skill-detail {
+      padding: 10px 0;
+      border-top: 1px dashed rgba(154, 147, 189, 0.2);
+    }
+    .skill-detail:last-of-type {
+      border-bottom: 1px dashed rgba(154, 147, 189, 0.2);
+    }
+    .skill-detail-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .skill-detail-name .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 1px;
+    }
+    .skill-detail-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ==== 对局内快捷提示 ==== */
+    .toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(21, 16, 46, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      color: var(--text-gold);
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      z-index: 300;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield"></div>
+
+  <!-- 顶部工具栏 -->
+  <div class="top-bar">
+    <button class="icon-btn" title="音乐开关" id="btn-bgm" onclick="Audio.toggleBGM()">
+      🎵
+    </button>
+    <button class="icon-btn" title="音效开关" id="btn-sfx" onclick="Audio.toggleSFX()">
+      🔊
+    </button>
+    <button class="icon-btn" title="暂停" onclick="togglePause()" id="btn-pause" style="display:none;">
+      ⏸
+    </button>
+    <button class="icon-btn" title="设置" onclick="openSettings()">
+      ⚙
+    </button>
+  </div>
+
+  <!-- 技能全屏闪光 -->
+  <div class="skill-flash" id="skill-flash"></div>
+
+  <!-- 顶部 Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- 设置弹窗 -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-title">◆ 游 戏 设 置 ◆</div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          背景音乐
+          <small>环境氛围音乐</small>
+        </div>
+        <div class="setting-value">
+          <input type="range" id="bgm-vol" min="0" max="100" value="45" oninput="Audio.setBGMVol(this.value)">
+          <span class="val-text" id="bgm-val">45</span>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          音效音量
+          <small>技能 / 点击 / 提示音</small>
+        </div>
+        <div class="setting-value">
+          <input type="range" id="sfx-vol" min="0" max="100" value="65" oninput="Audio.setSFXVol(this.value)">
+          <span class="val-text" id="sfx-val">65</span>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          AI 难度
+          <small>调整电脑对手强度</small>
+        </div>
+        <div class="setting-value">
+          <div class="diff-select">
+            <button class="diff-btn" onclick="setDifficulty('easy', this)">简单</button>
+            <button class="diff-btn active" onclick="setDifficulty('normal', this)">普通</button>
+            <button class="diff-btn" onclick="setDifficulty('hard', this)">困难</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          动画速度
+          <small>影响动画与过场节奏</small>
+        </div>
+        <div class="setting-value">
+          <div class="diff-select">
+            <button class="diff-btn" onclick="setAnimSpeed('slow', this)">慢</button>
+            <button class="diff-btn active" onclick="setAnimSpeed('normal', this)">正常</button>
+            <button class="diff-btn" onclick="setAnimSpeed('fast', this)">快</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          震屏效果
+          <small>受击 / 技能时的屏幕震动</small>
+        </div>
+        <div class="setting-value">
+          <div class="toggle on" id="toggle-shake" onclick="toggleSetting('shake', this)"></div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          对战战绩
+          <small>累计胜场 / 总场次</small>
+        </div>
+        <div class="setting-value">
+          <span class="val-text" id="stat-display" style="font-size:13px;">0 / 0</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-wins">0</div>
+          <div class="stat-label">总胜场</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-games">0</div>
+          <div class="stat-label">总场次</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-winrate">0%</div>
+          <div class="stat-label">胜率</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-best">—</div>
+          <div class="stat-label">最快回合</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-small" onclick="resetStats()">重置战绩</button>
+        <button class="btn btn-primary btn-small" onclick="closeSettings()">关 闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 暂停层 -->
+  <div class="pause-overlay" id="pause-overlay">
+    <div class="pause-title">PAUSED</div>
+    <div style="color: var(--text-dim); letter-spacing: 4px;">游 戏 已 暂 停</div>
+    <div class="pause-buttons">
+      <button class="btn btn-primary" onclick="togglePause()">继 续 游 戏</button>
+      <button class="btn" onclick="restartGame()">重 新 开 始</button>
+      <button class="btn" onclick="exitToMenu()">返 回 主 菜 单</button>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="title-bar">
+      <div class="game-title">SPIRAL COVENANT</div>
+      <div class="game-subtitle">螺 旋 契 约 · 命 运 对 决</div>
+    </div>
+
+    <!-- ====== 主菜单 ====== -->
+    <div id="menu-view" class="view menu-view active">
+      <div class="menu-art">
+        <div class="spiral-ring r1"></div>
+        <div class="spiral-ring r2"></div>
+        <div class="spiral-ring r3"></div>
+        <div class="menu-art-core">∞</div>
+      </div>
+      <div class="menu-desc">
+        在 <strong>三层螺旋</strong> 的命运之塔上，以 <strong>石头 · 剪刀 · 布</strong> 博弈决定每一步前进。
+        <br>选择你的英雄，积攒能量释放终极技能，率先抵达塔顶终点的契约者，赢得这场命运对决。
+      </div>
+      <div style="display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;">
+        <button class="btn btn-primary" onclick="startGame()">开 始 对 决</button>
+        <button class="btn" onclick="showRules()">查 阅 规 则</button>
+      </div>
+    </div>
+
+    <!-- ====== 英雄选择 ====== -->
+    <div id="hero-view" class="view hero-view">
+      <!-- 玩家 1 -->
+      <div class="hero-section p1">
+        <div class="hero-section-title">◆ 玩家一 · 选择你的英雄</div>
+        <div class="hero-grid" id="p1-hero-grid"></div>
+      </div>
+      <!-- 玩家 2 -->
+      <div class="hero-section p2">
+        <div class="hero-section-title">◆ 玩家二 · 选择你的英雄</div>
+        <div class="hero-grid" id="p2-hero-grid"></div>
+      </div>
+      <div class="confirm-bar">
+        <button class="btn" onclick="backToMenu()">返回</button>
+        <button class="btn btn-primary" id="confirm-btn" onclick="confirmHeroes()" disabled>确 认 英 雄 · 开 始 对 决</button>
+      </div>
+    </div>
+
+    <!-- ====== 游戏主界面 ====== -->
+    <div id="game-view" class="view">
+      <div class="players-bar">
+        <!-- 玩家1 状态 -->
+        <div class="player-card p1" id="p1-card">
+          <div class="p-header">
+            <span class="p-tag">P1</span>
+            <span class="p-hero-name p-hero-color" id="p1-hero">疾风骑士</span>
+            <span class="p-position" id="p1-pos">( 格 0 )</span>
+          </div>
+          <div class="status-badges" id="p1-badges"></div>
+          <div class="energy-row">
+            <span class="energy-label">能量</span>
+            <div class="energy-slots" id="p1-energy-slots"></div>
+          </div>
+          <div class="skill-buttons" id="p1-skills"></div>
+        </div>
+        <div class="turn-indicator" id="turn-indicator">P1 的回合</div>
+        <!-- 玩家2 状态 -->
+        <div class="player-card p2" id="p2-card">
+          <div class="p-header">
+            <span class="p-position" id="p2-pos">( 格 0 )</span>
+            <span class="p-hero-name p-hero-color" id="p2-hero">烈焰战士</span>
+            <span class="p-tag">P2</span>
+          </div>
+          <div class="status-badges" id="p2-badges"></div>
+          <div class="energy-row">
+            <span class="energy-label">能量</span>
+            <div class="energy-slots" id="p2-energy-slots"></div>
+          </div>
+          <div class="skill-buttons" id="p2-skills"></div>
+        </div>
+      </div>
+
+      <div class="game-layout">
+        <!-- 棋盘 -->
+        <div class="board-panel">
+          <div class="board-title">✦ 命 运 之 塔 · 三 层 螺 旋 ✦</div>
+          <div class="spiral-board">
+            <div class="board-3d" id="board"></div>
+            <div class="layer-tag lt-green">━ 第一层 · 起步层 ━</div>
+            <div class="layer-tag lt-purple">━ 第二层 · 博弈层 ━</div>
+            <div class="layer-tag lt-gold">━ 第三层 · 冲刺层 ━</div>
+          </div>
+        </div>
+
+        <!-- 操作面板 -->
+        <div class="action-panel">
+          <div class="panel-card">
+            <div class="panel-title">◆ 选 择 你 的 出 拳</div>
+            <div class="status-line" id="action-prompt">轮到你出招</div>
+            <div class="rps-buttons">
+              <button class="rps-btn" id="rps-rock" onclick="playRound('rock')">
+                <span class="rps-emoji">✊</span><span>石头</span>
+              </button>
+              <button class="rps-btn" id="rps-scissors" onclick="playRound('scissors')">
+                <span class="rps-emoji">✌️</span><span>剪刀</span>
+              </button>
+              <button class="rps-btn" id="rps-paper" onclick="playRound('paper')">
+                <span class="rps-emoji">✋</span><span>布</span>
+              </button>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title">◆ 特 殊 格 图 例</div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-icon">💎</div><div class="legend-text">能量泉 +2</div></div>
+              <div class="legend-item"><div class="legend-icon">⚡</div><div class="legend-text">加速格 翻倍</div></div>
+              <div class="legend-item"><div class="legend-icon">🕳️</div><div class="legend-text">陷阱 -1步/-1</div></div>
+              <div class="legend-item"><div class="legend-icon">🌫️</div><div class="legend-text">迷雾 盲选</div></div>
+              <div class="legend-item"><div class="legend-icon">🌀</div><div class="legend-text">传送 跃迁</div></div>
+              <div class="legend-item"><div class="legend-icon">🔄</div><div class="legend-text">回溯 弹回</div></div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title">◆ 对 决 纪 录</div>
+            <div class="game-log" id="game-log"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 结算界面 ====== -->
+    <div id="result-view" class="view result-view">
+      <div class="result-crown" id="result-crown">👑</div>
+      <div class="result-title" id="result-title">VICTORY</div>
+      <div class="result-heroes" id="result-heroes"></div>
+      <div style="color: var(--text-dim); font-size: 14px; letter-spacing: 3px;" id="result-subtitle"></div>
+      <div style="display: flex; gap: 14px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
+        <button class="btn btn-primary" onclick="restartGame()">再 来 一 局</button>
+        <button class="btn" onclick="backToMenu()">返回主菜单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== RPS 动画覆盖层 ====== -->
+  <div class="rps-overlay" id="rps-overlay">
+    <div class="rps-arena">
+      <div class="rps-side p1">
+        <div class="rps-side-label" id="rps-p1-label">玩家一</div>
+        <div class="rps-hand" id="rps-p1-hand">✊</div>
+      </div>
+      <div class="rps-vs">VS</div>
+      <div class="rps-side p2">
+        <div class="rps-side-label" id="rps-p2-label">玩家二</div>
+        <div class="rps-hand" id="rps-p2-hand">✊</div>
+      </div>
+    </div>
+    <div class="rps-result-banner" id="rps-result">...</div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 《螺旋契约 · 命运对决》—— 游戏核心逻辑
+    // ============================================================
+
+    // --- 常量 & 配置 ---
+    const BOARD_SIZE = 30;
+    const ENERGY_MAX = 5;
+
+    // 英雄定义
+    const HEROES = {
+      wind: {
+        id: 'wind',
+        name: '疾风骑士',
+        icon: '🗡️',
+        color: '#2ecc71',
+        quote: '"速度就是最好的防御。"',
+        passive: { name: '轻装上阵', desc: '每次RPS获胜额外 +1 步' },
+        small: { name: '冲刺', cost: 1, desc: '立刻再前进 2 步' },
+        ultimate: { name: '疾风突袭', desc: '传送到对手前方 3 格处' }
+      },
+      shadow: {
+        id: 'shadow',
+        name: '暗影刺客',
+        icon: '🗿',
+        color: '#8e44ad',
+        quote: '"你看不到我，但你已经输了。"',
+        passive: { name: '暗影步', desc: '平局时不会原地，改为前进 1 步' },
+        small: { name: '毒刃', cost: 1, desc: '对手下一轮 RPS 无法出「布」' },
+        ultimate: { name: '暗影置换', desc: '与对手交换位置（逆转战局）' }
+      },
+      ice: {
+        id: 'ice',
+        name: '寒冰法师',
+        icon: '❄️',
+        color: '#3498db',
+        quote: '"冷静，是胜利的第一步。"',
+        passive: { name: '冰霜领域', desc: '你获胜时，对手下一轮步数 -1（至少为 0）' },
+        small: { name: '冰墙', cost: 1, desc: '在对手前方 1 格放置冰墙，对手碰到后退 1 步' },
+        ultimate: { name: '暴风雪', desc: '冻结对手 1 回合，你连续行动两次' }
+      },
+      flame: {
+        id: 'flame',
+        name: '烈焰战士',
+        icon: '🔥',
+        color: '#e74c3c',
+        quote: '"我走过的路，就是你的禁区。"',
+        passive: { name: '烈焰足迹', desc: '每经过一格普通格，留下火焰；对手踩到损失 1 能量' },
+        small: { name: '烈焰斩', cost: 1, desc: '让对手损失 1 能量' },
+        ultimate: { name: '陨石冲击', desc: '摧毁前方 3 格内的特殊格（去除其效果）并前进 2 步' }
+      },
+      cat: {
+        id: 'cat',
+        name: '幻影灵猫',
+        icon: '🐾',
+        color: '#f39c12',
+        quote: '"运气？那是我精心计算的概率。"',
+        passive: { name: '九命', desc: '每局限一次，RPS 输时可以重来（重新出拳）' },
+        small: { name: '读心', cost: 1, desc: '预知对手下一轮的出拳（可见提示）' },
+        ultimate: { name: '幻影分身', desc: '退回到当前层起点，但下一次 RPS 无论输赢都前进，输则走 2 步' }
+      }
+    };
+
+    // 特殊格子配置
+    const CELL_TYPES = {
+      normal: { icon: '', label: '普通' },
+      energy: { icon: '💎', label: '能量泉' },
+      boost:  { icon: '⚡', label: '加速格' },
+      trap:   { icon: '🕳️', label: '陷阱格' },
+      fog:    { icon: '🌫️', label: '迷雾格' },
+      teleport:{ icon: '🌀', label: '传送格' },
+      back:   { icon: '🔄', label: '回溯格' }
+    };
+
+    // RPS 规则
+    const RPS_CHOICES = {
+      rock:     { icon: '✊', text: '石头', wins: 'scissors', winSteps: 0, winEnergy: 1 },
+      scissors: { icon: '✌️', text: '剪刀', wins: 'paper',    winSteps: 2, winEnergy: 0 },
+      paper:    { icon: '✋', text: '布',   wins: 'rock',     winSteps: 5, winEnergy: 0 }
+    };
+
+    // --- 游戏状态 ---
+    const state = {
+      phase: 'MENU', // MENU, HERO_SELECT, PLAYING, ROUND_RESULT, GAME_OVER
+      currentPlayer: 1,
+      selectedHeroes: [null, null],
+      players: [
+        {
+          id: 1,
+          hero: null,
+          position: 0,
+          energy: 0,
+          badges: [],
+          // 英雄专属状态
+          flameTrail: [],         // 烈焰战士走过的格位置
+          iceWallAt: null,        // 寒冰法师放置的冰墙位置
+          frozen: false,          // 被冻结（跳过下回合）
+          debuff: null,           // 下回合被削弱：{ type, value }
+          poisonNoPaper: false,   // 暗影刺客毒刃：下轮无法出布
+          mindRead: false,        // 幻影灵猫读心：下轮可预知对手
+          fogNext: false,         // 下轮盲选
+          nineLifeUsed: false,    // 九命是否已使用
+          phantomActive: false,   // 幻影灵猫终极生效中
+          stepDebuff: false,      // 寒冰法师被动：下次对手获胜步数 -1
+          boostNext: false,       // 加速格：下次获胜步数翻倍
+          extraTurn: false        // 额外回合（暴风雪）
+        },
+        {
+          id: 2,
+          hero: null,
+          position: 0,
+          energy: 0,
+          badges: [],
+          flameTrail: [],
+          iceWallAt: null,
+          frozen: false,
+          debuff: null,
+          poisonNoPaper: false,
+          mindRead: false,
+          fogNext: false,
+          nineLifeUsed: false,
+          phantomActive: false,
+          stepDebuff: false,
+          boostNext: false,
+          extraTurn: false
+        }
+      ],
+      board: [],             // 30 格，每格 { type, destroyed, layer }
+      turnCount: 1,
+      rpsLock: false
+    };
+
+    // --- 视图切换 ---
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // --- 启动 / 菜单 ---
+    function startGame() {
+      state.phase = 'HERO_SELECT';
+      state.selectedHeroes = [null, null];
+      renderHeroGrids();
+      updateConfirmButton();
+      showView('hero-view');
+    }
+
+    function renderHeroGrids() {
+      ['p1-hero-grid', 'p2-hero-grid'].forEach((gid, idx) => {
+        const grid = document.getElementById(gid);
+        grid.innerHTML = '';
+        Object.values(HEROES).forEach(hero => {
+          const card = document.createElement('div');
+          card.className = 'hero-card';
+          card.setAttribute('data-hero', hero.id);
+          card.onclick = () => selectHero(idx + 1, hero.id);
+          card.innerHTML = `
+            <div class="hero-icon" style="color:${hero.color}">${hero.icon}</div>
+            <div class="hero-name" style="color:${hero.color}">${hero.name}</div>
+            <div class="hero-quote">${hero.quote}</div>
+            <div class="hero-skills-list">
+              <div class="skill-row passive"><span class="skill-label">被动</span><span class="skill-desc">${hero.passive.name}：${hero.passive.desc}</span></div>
+              <div class="skill-row small"><span class="skill-label">小技</span><span class="skill-desc">${hero.small.name}（${hero.small.cost}能量）：${hero.small.desc}</span></div>
+              <div class="skill-row ultimate"><span class="skill-label">终极</span><span class="skill-desc">${hero.ultimate.name}（满能量）：${hero.ultimate.desc}</span></div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      });
+    }
+
+    function selectHero(playerIdx, heroId) {
+      const pStateIdx = playerIdx - 1;
+      state.selectedHeroes[pStateIdx] = heroId;
+      refreshHeroSelectionUI(playerIdx, heroId);
+      updateConfirmButton();
+    }
+
+    function refreshHeroSelectionUI(playerIdx, heroId) {
+      const grid = document.getElementById(`p${playerIdx}-hero-grid`);
+      grid.querySelectorAll('.hero-card').forEach(c => {
+        c.classList.toggle('selected', c.getAttribute('data-hero') === heroId);
+      });
+      // 另一位玩家选过的英雄，在当前玩家面板变灰（不强制）
+    }
+
+    function updateConfirmButton() {
+      const btn = document.getElementById('confirm-btn');
+      const ok = state.selectedHeroes[0] && state.selectedHeroes[1];
+      btn.disabled = !ok;
+      if (ok) btn.textContent = `确 认 · ${HEROES[state.selectedHeroes[0]].name} VS ${HEROES[state.selectedHeroes[1]].name}`;
+    }
+
+    function confirmHeroes() {
+      if (!state.selectedHeroes[0] || !state.selectedHeroes[1]) return;
+
+      // 初始化玩家
+      for (let i = 0; i < 2; i++) {
+        const hero = HEROES[state.selectedHeroes[i]];
+        const p = state.players[i];
+        p.hero = hero;
+        p.position = 0;
+        p.energy = 0;
+        p.badges = [];
+        p.flameTrail = [];
+        p.iceWallAt = null;
+        p.frozen = false;
+        p.debuff = null;
+        p.poisonNoPaper = false;
+        p.mindRead = false;
+        p.fogNext = false;
+        p.nineLifeUsed = false;
+        p.phantomActive = false;
+        p.stepDebuff = false;
+        p.boostNext = false;
+        p.extraTurn = false;
+      }
+      state.currentPlayer = 1;
+      state.turnCount = 1;
+
+      generateBoard();
+
+      // 更新状态
+      updateStatus();
+      showView('game-view');
+      state.phase = 'PLAYING';
+      document.getElementById('btn-pause').style.display = 'flex';
+      Audio.startBGM('battle');
+      Audio.play('click');
+
+      addLog(`——— 命运之塔开启 · 第 ${state.turnCount} 回合 ———`, 'special');
+      addLog(`${state.players[0].hero.icon} ${state.players[0].hero.name}（P1）  vs  ${state.players[1].hero.icon} ${state.players[1].hero.name}（P2）`, 'special');
+      addLog(`P1 先手 · 请出拳`, 'system');
+    }
+
+    // --- 棋盘生成 ---
+    function generateBoard() {
+      state.board = [];
+      for (let i = 0; i < BOARD_SIZE; i++) {
+        let layer = i < 10 ? 1 : i < 20 ? 2 : 3;
+        let type = 'normal';
+        if (i === 0) { type = 'normal'; }
+        else if (i === BOARD_SIZE - 1) { type = 'normal'; } // 终点单独渲染
+        else {
+          // 随机决定特殊格（基于层级出现概率）
+          const r = Math.random();
+          if (layer === 1) {
+            if (r < 0.2) type = 'energy';
+            else if (r < 0.3) type = 'boost';
+          } else if (layer === 2) {
+            if (r < 0.2) type = 'trap';
+            else if (r < 0.35) type = 'fog';
+            else if (r < 0.5) type = 'energy';
+            else if (r < 0.6) type = 'boost';
+            else if (r < 0.75) type = 'teleport';
+          } else {
+            if (r < 0.2) type = 'trap';
+            else if (r < 0.35) type = 'teleport';
+            else if (r < 0.5) type = 'back';
+            else if (r < 0.65) type = 'boost';
+            else if (r < 0.75) type = 'energy';
+          }
+        }
+        state.board.push({ type, layer, destroyed: false });
+      }
+
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+      // 30 格螺旋：从下方（第一层）绕到上方（第三层），呈 3D 螺旋上升
+      // 设计：每条 10 格呈弧形排列，三层叠加 Y 偏移
+      for (let i = 0; i < BOARD_SIZE; i++) {
+        const cell = document.createElement('div');
+        const pos = spiralCellPos(i);
+        const cellData = state.board[i];
+        cell.className = `cell l${cellData.layer}`;
+        cell.id = `cell-${i}`;
+        cell.style.left = pos.x + 'px';
+        cell.style.top = pos.y + 'px';
+        cell.style.transform = `translateZ(${pos.z}px) rotateX(${-55}deg) rotateZ(${8}deg)`;
+        if (i === 0) { cell.classList.add('start'); cell.textContent = '🏠'; }
+        else if (i === BOARD_SIZE - 1) { cell.classList.add('finish'); cell.textContent = '🏆'; }
+        else {
+          if (cellData.type !== 'normal') {
+            cell.classList.add('special-' + cellData.type);
+            cell.textContent = CELL_TYPES[cellData.type].icon;
+          }
+        }
+        const idxEl = document.createElement('div');
+        idxEl.className = 'idx';
+        idxEl.textContent = i;
+        cell.appendChild(idxEl);
+        boardEl.appendChild(cell);
+      }
+
+      // 棋子
+      for (let i = 0; i < 2; i++) {
+        const piece = document.createElement('div');
+        piece.className = `piece p${i + 1}`;
+        piece.id = `piece-${i + 1}`;
+        piece.textContent = i === 0 ? '⚔' : '🔥';
+        boardEl.appendChild(piece);
+      }
+      updatePiecePositions(false);
+    }
+
+    // 螺旋坐标（相对 board 容器，宽 ~ 680，高 480）
+    function spiralCellPos(i) {
+      const layer = Math.floor(i / 10);
+      const idxInLayer = i % 10;
+      // 每条层做成半圆形/弧形排布
+      const layerCenterY = 420 - layer * 140; // 第一层靠下，第三层靠上
+      const radius = 230 - layer * 28;
+      // 从右到左，再左到右——用 theta 表示
+      let theta;
+      if (layer % 2 === 0) {
+        theta = Math.PI * (0.05 + idxInLayer * 0.1); // 0.05π → π（从右往左）
+      } else {
+        theta = Math.PI * (0.95 - idxInLayer * 0.1); // 反过来
+      }
+      // 但让它看起来像"上升"，所以每条层有不同的中心
+      const x = 340 + Math.cos(theta) * radius;
+      const y = layerCenterY - Math.sin(theta) * 40 + (layer * 0);
+      const z = layer * 50 + (idxInLayer * 5);
+      return { x: x - 26, y: y - 26, z };
+    }
+
+    function updatePiecePositions(animate = true) {
+      for (let i = 0; i < 2; i++) {
+        const pos = state.players[i].position;
+        const posData = spiralCellPos(pos);
+        const piece = document.getElementById(`piece-${i + 1}`);
+        // 棋子不随 board-3d 旋转，使用像素坐标
+        // board-3d 会被 rotateX(55deg) rotateZ(-8deg)，所以棋子位置在 board 容器的 transform 下呈现
+        // 直接套用 cell 位置：
+        piece.style.left = (posData.x + 12) + 'px';
+        piece.style.top = (posData.y + 12) + 'px';
+        piece.style.transform = `translateZ(${posData.z + 30}px)`;
+      }
+    }
+
+    function highlightCell(pos) {
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight'));
+      const el = document.getElementById(`cell-${pos}`);
+      if (el) {
+        el.classList.add('highlight');
+        setTimeout(() => el.classList.remove('highlight'), 1800);
+      }
+    }
+
+    // --- 玩家 UI 渲染 ---
+    function renderAllUI() {
+      renderPlayerCard(1);
+      renderPlayerCard(2);
+      document.getElementById('turn-indicator').textContent =
+        state.phase === 'GAME_OVER' ? '对局结束' :
+        `回合 ${state.turnCount} · P${state.currentPlayer} 的回合`;
+
+      // 启用 / 禁用 RPS 按钮
+      const disabled = state.phase !== 'PLAYING' || state.rpsLock;
+      document.querySelectorAll('.rps-btn').forEach(b => b.disabled = disabled);
+
+      // 如果当前玩家被毒刃限制无法出布
+      const cur = state.players[state.currentPlayer - 1];
+      const paperBtn = document.getElementById('rps-paper');
+      if (cur.poisonNoPaper) {
+        paperBtn.classList.add('disabled-choice');
+      } else {
+        paperBtn.classList.remove('disabled-choice');
+      }
+
+      // 状态提示
+      const prompt = document.getElementById('action-prompt');
+      if (state.phase === 'PLAYING') {
+        let msg = `P${state.currentPlayer} · ${cur.hero.name} · 请出拳`;
+        if (cur.fogNext) {
+          msg += ' 🌫️ 迷雾笼罩';
+          prompt.classList.add('fog');
+        } else {
+          prompt.classList.remove('fog');
+        }
+        if (cur.mindRead) {
+          msg += ' 🔮 已知对手下一手';
+        }
+        prompt.textContent = msg;
+      } else {
+        prompt.textContent = '—';
+      }
+
+      // 冰墙渲染
+      renderIceWall();
+      // 火焰足迹
+      renderFlameTrails();
+    }
+
+    function renderPlayerCard(pIdx) {
+      const p = state.players[pIdx - 1];
+      document.getElementById(`p${pIdx}-hero`).textContent = p.hero.name;
+      document.getElementById(`p${pIdx}-pos`).textContent = `( 格 ${p.position} / ${BOARD_SIZE - 1} )`;
+
+      // 能量槽
+      const slotsEl = document.getElementById(`p${pIdx}-energy-slots`);
+      slotsEl.innerHTML = '';
+      for (let i = 0; i < ENERGY_MAX; i++) {
+        const s = document.createElement('div');
+        s.className = 'energy-slot' + (i < p.energy ? ' filled' : '');
+        slotsEl.appendChild(s);
+      }
+
+      // 徽章
+      const badgesEl = document.getElementById(`p${pIdx}-badges`);
+      badgesEl.innerHTML = '';
+      const addB = (cls, text) => {
+        const b = document.createElement('span');
+        b.className = 'badge ' + cls;
+        b.textContent = text;
+        badgesEl.appendChild(b);
+      };
+      if (p.frozen) addB('frozen', '❄ 被冻结');
+      if (p.poisonNoPaper) addB('', '☠ 无法出布');
+      if (p.mindRead) addB('', '🔮 读心术');
+      if (p.fogNext) addB('fog', '🌫 迷雾');
+      if (p.boostNext) addB('boost', '⚡ 加速');
+      if (p.phantomActive) addB('', '👻 幻影');
+      if (!p.nineLifeUsed && p.hero.id === 'cat') addB('nine-life', '🐾 九命可用');
+      if (p.extraTurn) addB('', '⏩ 额外回合');
+
+      // 技能按钮
+      const skillsEl = document.getElementById(`p${pIdx}-skills`);
+      skillsEl.innerHTML = '';
+      const smallBtn = document.createElement('button');
+      smallBtn.className = 'skill-btn';
+      smallBtn.textContent = `${p.hero.small.name}(${p.hero.small.cost})`;
+      smallBtn.disabled = p.energy < p.hero.small.cost || state.currentPlayer !== pIdx || state.phase !== 'PLAYING' || state.rpsLock;
+      if (p.energy >= p.hero.small.cost && state.currentPlayer === pIdx) smallBtn.classList.add('ready');
+      smallBtn.onclick = () => useSmallSkill(pIdx);
+      skillsEl.appendChild(smallBtn);
+
+      const ultBtn = document.createElement('button');
+      ultBtn.className = 'skill-btn ultimate';
+      ultBtn.textContent = `${p.hero.ultimate.name}(满)`;
+      ultBtn.disabled = p.energy < ENERGY_MAX || state.currentPlayer !== pIdx || state.phase !== 'PLAYING' || state.rpsLock;
+      if (p.energy >= ENERGY_MAX && state.currentPlayer === pIdx) ultBtn.classList.add('ready');
+      ultBtn.onclick = () => useUltimateSkill(pIdx);
+      skillsEl.appendChild(ultBtn);
+
+      // 活跃玩家高亮
+      document.getElementById(`p${pIdx}-card`).classList.toggle('active', state.currentPlayer === pIdx && state.phase === 'PLAYING');
+    }
+
+    function renderIceWall() {
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('ice-wall'));
+      for (let p = 0; p < 2; p++) {
+        const pos = state.players[p].iceWallAt;
+        if (pos != null) {
+          const el = document.getElementById(`cell-${pos}`);
+          if (el) el.classList.add('ice-wall');
+        }
+      }
+    }
+    function renderFlameTrails() {
+      document.querySelectorAll('.cell').forEach(c => {
+        if (!c.classList.contains('finish') && !c.classList.contains('start')) {
+          c.classList.remove('flame-trail');
+        }
+      });
+      for (let p = 0; p < 2; p++) {
+        const hero = state.players[p].hero;
+        if (hero.id === 'flame') {
+          state.players[p].flameTrail.forEach(pos => {
+            const el = document.getElementById(`cell-${pos}`);
+            if (el) el.classList.add('flame-trail');
+          });
+        }
+      }
+    }
+
+    // --- 能量 ---
+    function addEnergy(pIdx, amount) {
+      const p = state.players[pIdx - 1];
+      const before = p.energy;
+      p.energy = Math.min(ENERGY_MAX, p.energy + amount);
+      const gained = p.energy - before;
+      if (gained > 0) {
+        addLog(`P${pIdx} 能量 +${gained}（${p.energy}/${ENERGY_MAX}）`, 'skill');
+        Audio.play('energy-up');
+      }
+      else if (amount < 0) addLog(`P${pIdx} 能量 -${Math.abs(amount)}（${p.energy}/${ENERGY_MAX}）`, 'lose');
+      if (p.energy === ENERGY_MAX && before < ENERGY_MAX) {
+        addLog(`⚡ P${pIdx} · ${p.hero.name} 能量满溢！终极技能已就绪`, 'ultimate');
+        Audio.play('energy-full');
+        showToast(`${p.hero.name} · 终极技能就绪！`, 1800);
+      }
+    }
+
+    // --- RPS 对战 ---
+    function playRound(playerChoice) {
+      if (state.phase !== 'PLAYING' || state.rpsLock) return;
+      const cur = state.players[state.currentPlayer - 1];
+
+      // 检查被冻结
+      if (cur.frozen) {
+        addLog(`❄ P${state.currentPlayer} 被冻结，跳过回合`, 'lose');
+        cur.frozen = false;
+        endTurn(false);
+        return;
+      }
+
+      // 毒刃限制
+      if (cur.poisonNoPaper && playerChoice === 'paper') return;
+
+      state.rpsLock = true;
+
+      // 对手：当前为双人共用浏览器，P2 = 另一玩家（此处实现为 AI 选择，或由玩家轮流控制）
+      // 为保持简洁且有趣，这里采用「当前玩家出拳后，对方由简单 AI 出拳」，并交替回合。
+      // 但因为是双人对战设计，我们改为：每一轮由 currentPlayer 出拳，对手自动出拳（根据英雄/状态）
+      const opponentChoice = aiChooseSmart(state.currentPlayer === 1 ? 2 : 1);
+
+      // 迷雾盲选隐藏，在动画前先应用
+      const fog = cur.fogNext;
+      const label1 = `P${state.currentPlayer} · ${cur.hero.name}`;
+      const label2 = `P${state.currentPlayer === 1 ? 2 : 1} · ${state.players[state.currentPlayer === 1 ? 1 : 0].hero.name}`;
+
+      // 读心：显示对手出拳意图（前摇提示）
+      if (cur.mindRead) {
+        addLog(`🔮 读心生效：对手将出 ${RPS_CHOICES[opponentChoice].text}`, 'skill');
+      }
+
+      // 播放动画
+      showRPSAnimation(label1, label2, playerChoice, opponentChoice, fog, (result) => {
+        // 结果结算
+        applyRoundResult(playerChoice, opponentChoice);
+        state.rpsLock = false;
+        renderAllUI();
+
+        // 检查胜利
+        if (checkWin()) return;
+
+        // 结束回合
+        endTurn(true);
+      });
+    }
+
+    function aiChoose(oppIdx) {
+      const p = state.players[oppIdx - 1];
+      const choices = ['rock', 'scissors', 'paper'];
+      // 毒刃：无法出布
+      const valid = p.poisonNoPaper ? choices.filter(c => c !== 'paper') : choices;
+      // 简单策略：能量低优先出石头；其他随机
+      if (p.energy < ENERGY_MAX - 1 && Math.random() < 0.35) return 'rock';
+      return valid[Math.floor(Math.random() * valid.length)];
+    }
+
+    function showRPSAnimation(label1, label2, choice1, choice2, fog, done) {
+      const overlay = document.getElementById('rps-overlay');
+      const p1Hand = document.getElementById('rps-p1-hand');
+      const p2Hand = document.getElementById('rps-p2-hand');
+      const p1Lbl = document.getElementById('rps-p1-label');
+      const p2Lbl = document.getElementById('rps-p2-label');
+      const resultEl = document.getElementById('rps-result');
+
+      p1Lbl.textContent = label1;
+      p2Lbl.textContent = label2;
+
+      overlay.classList.add('active');
+      // 先摇几下
+      let count = 0;
+      const shakeIcons = ['✊', '✌️', '✋'];
+      const shake = setInterval(() => {
+        p1Hand.textContent = shakeIcons[count % 3];
+        p2Hand.textContent = fog ? '❓' : shakeIcons[(count + 1) % 3];
+        count++;
+      }, 180);
+
+      setTimeout(() => {
+        clearInterval(shake);
+        p1Hand.textContent = RPS_CHOICES[choice1].icon;
+        p2Hand.textContent = fog ? '❓' : RPS_CHOICES[choice2].icon;
+        // 结果判定
+        const cur = state.currentPlayer;
+        const winner = getWinner(choice1, choice2); // 'p1' | 'p2' | 'draw'  以 choice1 为准
+        const isCur = (winner === 'p1');
+        const isDraw = (winner === 'draw');
+
+        let banner = '';
+        if (isDraw) banner = 'DRAW · 平 局';
+        else if (isCur) banner = `P${cur}  WINS · 胜 利`;
+        else banner = `P${cur}  LOSE · 失 败`;
+        resultEl.textContent = banner;
+        resultEl.className = 'rps-result-banner ' + (isDraw ? 'draw' : (isCur ? 'win' : 'lose'));
+
+        // 播放音效
+        if (isCur) Audio.play('rps-win');
+        else if (isDraw) Audio.play('rps-draw');
+        else {
+          Audio.play('rps-lose');
+          triggerShake();
+        }
+
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          done(winner);
+        }, 1400);
+      }, 1100);
+    }
+
+    function getWinner(a, b) {
+      if (a === b) return 'draw';
+      if (RPS_CHOICES[a].wins === b) return 'p1';
+      return 'p2';
+    }
+
+    // --- 回合结算 ---
+    function applyRoundResult(curChoice, oppChoice) {
+      const curIdx = state.currentPlayer;
+      const cur = state.players[curIdx - 1];
+      const oppIdx = curIdx === 1 ? 2 : 1;
+      const opp = state.players[oppIdx - 1];
+      const winner = getWinner(curChoice, oppChoice);
+
+      // 清掉每回合一次性状态
+      cur.mindRead = false;
+      opp.mindRead = false;
+      cur.fogNext = false;
+      opp.fogNext = false;
+
+      // --- 幻影灵猫终极：无论输赢都前进 ---
+      if (cur.phantomActive) {
+        cur.phantomActive = false;
+        let steps = 2;
+        addLog(`👻 幻影分身生效：P${curIdx} 前进 ${steps} 步`, 'ultimate');
+        movePlayer(curIdx, steps, { allowFlameTrail: true });
+        // 毒刃状态也应该清理
+        cur.poisonNoPaper = false;
+        return;
+      }
+      cur.poisonNoPaper = false;
+
+      if (winner === 'draw') {
+        // 平局
+        addLog(`🤝 平局：双方都出 ${RPS_CHOICES[curChoice].text}`, 'system');
+        // 暗影刺客被动：平局时前进 1 步
+        if (cur.hero.id === 'shadow') {
+          addLog(`🗿 暗影步：P${curIdx} 平局前进 1 步`, 'special');
+          movePlayer(curIdx, 1, { allowFlameTrail: true });
+        }
+        // 幻影灵猫九命不触发（仅输时）
+        return;
+      }
+
+      const curWin = (winner === 'p1');
+
+      if (curWin) {
+        // 当前玩家获胜
+        const info = RPS_CHOICES[curChoice];
+        let steps = info.winSteps;
+        // 疾风骑士被动：额外 +1
+        if (cur.hero.id === 'wind') steps += 1;
+        // 加速格
+        if (cur.boostNext) {
+          steps *= 2;
+          cur.boostNext = false;
+          addLog(`⚡ 加速格生效：步数翻倍 → ${steps}`, 'special');
+        }
+        // 寒冰法师被动：对手下一轮获胜步数 -1（标记）
+        if (cur.hero.id === 'ice') {
+          opp.stepDebuff = true;
+          addLog(`❄ 冰霜领域：P${oppIdx} 下次获胜步数 -1`, 'skill');
+        }
+        // 能量
+        if (info.winEnergy > 0) addEnergy(curIdx, 1);
+        // 获胜统一 +1（作为机制：赢一次得 1 能量）
+        addEnergy(curIdx, 1);
+
+        addLog(`✅ P${curIdx} 出 ${info.text} 获胜，前进 ${steps} 步`, 'win');
+        movePlayer(curIdx, steps, { allowFlameTrail: true });
+      } else {
+        // 当前玩家输
+        // 幻影灵猫九命
+        if (cur.hero.id === 'cat' && !cur.nineLifeUsed) {
+          cur.nineLifeUsed = true;
+          addLog(`🐾 九命触发：P${curIdx} 输了，但可以重新出拳！`, 'ultimate');
+          // 回到可出拳状态（不推进回合）
+          state.rpsLock = false;
+          renderAllUI();
+          return;
+        }
+        addLog(`❌ P${curIdx} 出 ${RPS_CHOICES[curChoice].text} 落败，原地不动`, 'lose');
+        // 失败也给一点能量兜底
+        if (Math.random() < 0.3) addEnergy(curIdx, 1);
+        else addEnergy(oppIdx, 1);
+      }
+    }
+
+    // --- 移动棋子 & 触发特殊格 ---
+    function movePlayer(pIdx, steps, opts = {}) {
+      const p = state.players[pIdx - 1];
+      const start = p.position;
+      let target = Math.max(0, Math.min(BOARD_SIZE - 1, start + steps));
+
+      // 逐格移动（以便触发沿途效果）
+      if (steps > 0) {
+        for (let i = start + 1; i <= target; i++) {
+          // 冰墙检测
+          const opp = state.players[pIdx === 1 ? 1 : 0];
+          if (opp.iceWallAt === i) {
+            target = Math.max(0, i - 2); // 撞上冰墙，退后 1 格（即 i-1 处退到 i-2）
+            addLog(`🧊 撞上冰墙！P${pIdx} 被弹回至 ${target}`, 'lose');
+            opp.iceWallAt = null;
+            break;
+          }
+        }
+        // 终点检测
+        if (target >= BOARD_SIZE - 1) {
+          p.position = BOARD_SIZE - 1;
+          highlightCell(BOARD_SIZE - 1);
+          updatePiecePositions();
+          return;
+        }
+      }
+      // 向后移动：简化为直接到目标
+      p.position = target;
+
+      // 烈焰战士留下火焰足迹
+      if (p.hero.id === 'flame' && opts.allowFlameTrail && target > 0 && target < BOARD_SIZE - 1) {
+        const cellData = state.board[target];
+        if (cellData.type === 'normal' && !cellData.destroyed && !p.flameTrail.includes(target)) {
+          p.flameTrail.push(target);
+        }
+      }
+
+      highlightCell(target);
+      updatePiecePositions();
+
+      // 触发落点特殊格效果
+      if (steps !== 0 && target < BOARD_SIZE - 1) {
+        // 对手火焰足迹（踩上对方火焰）
+        const oppIdx = pIdx === 1 ? 2 : 1;
+        const opp = state.players[oppIdx - 1];
+        if (opp.flameTrail.includes(target)) {
+          addLog(`🔥 踩中烈焰足迹！P${pIdx} 损失 1 能量`, 'lose');
+          addEnergy(pIdx, -1);
+          // 消耗一次性
+          opp.flameTrail = opp.flameTrail.filter(x => x !== target);
+        }
+
+        triggerCellEffect(pIdx, target);
+      }
+    }
+
+    function triggerCellEffect(pIdx, pos) {
+      if (pos <= 0 || pos >= BOARD_SIZE - 1) return;
+      const cell = state.board[pos];
+      if (!cell || cell.destroyed) return;
+
+      const p = state.players[pIdx - 1];
+      switch (cell.type) {
+        case 'energy':
+          addLog(`💎 能量泉：P${pIdx} 获得 +2 能量`, 'special');
+          addEnergy(pIdx, 2);
+          Audio.play('special-cell');
+          break;
+        case 'boost':
+          addLog(`⚡ 加速格：P${pIdx} 下次获胜步数翻倍`, 'special');
+          p.boostNext = true;
+          Audio.play('special-cell');
+          break;
+        case 'trap':
+          addLog(`🕳️ 陷阱格：P${pIdx} 后退 1 步，损失 1 能量`, 'lose');
+          p.position = Math.max(0, p.position - 1);
+          highlightCell(p.position);
+          updatePiecePositions();
+          addEnergy(pIdx, -1);
+          Audio.play('trap');
+          triggerShake();
+          break;
+        case 'fog':
+          addLog(`🌫️ 迷雾格：P${pIdx} 下一轮盲选`, 'special');
+          p.fogNext = true;
+          Audio.play('special-cell');
+          break;
+        case 'teleport': {
+          // 向前传送到下一层入口
+          const layer = cell.layer;
+          const nextLayerStart = layer * 10; // 1→10, 2→20
+          const dest = Math.min(BOARD_SIZE - 1, nextLayerStart);
+          addLog(`🌀 传送格：P${pIdx} 跃迁至第 ${layer + 1} 层 · 格 ${dest}`, 'special');
+          p.position = dest;
+          highlightCell(dest);
+          updatePiecePositions();
+          Audio.play('special-cell');
+          break;
+        }
+        case 'back': {
+          // 弹回当前层起点
+          const layer = cell.layer;
+          const layerStart = (layer - 1) * 10;
+          addLog(`🔄 回溯格：P${pIdx} 被弹回第 ${layer} 层起点 · 格 ${layerStart}`, 'lose');
+          p.position = layerStart;
+          highlightCell(layerStart);
+          updatePiecePositions();
+          Audio.play('trap');
+          triggerShake();
+          break;
+        }
+      }
+    }
+
+    // --- 小技能 ---
+    function useSmallSkill(pIdx) {
+      const p = state.players[pIdx - 1];
+      if (p.energy < p.hero.small.cost || state.currentPlayer !== pIdx || state.phase !== 'PLAYING' || state.rpsLock) return;
+      p.energy -= p.hero.small.cost;
+      const oppIdx = pIdx === 1 ? 2 : 1;
+      const opp = state.players[oppIdx - 1];
+      addLog(`🌀 P${pIdx} · ${p.hero.name} 使用 小技能 ${p.hero.small.name}`, 'skill');
+      Audio.play('skill-small');
+      triggerSkillFlash(p.hero.id);
+
+      switch (p.hero.id) {
+        case 'wind':
+          movePlayer(pIdx, 2, { allowFlameTrail: true });
+          break;
+        case 'shadow':
+          opp.poisonNoPaper = true;
+          addLog(`☠ P${oppIdx} 下一轮无法出「布」`, 'skill');
+          break;
+        case 'ice': {
+          const wallPos = Math.min(BOARD_SIZE - 2, opp.position + 1);
+          p.iceWallAt = wallPos;
+          addLog(`🧊 在 P${oppIdx} 前方 1 格（${wallPos}）放置冰墙`, 'skill');
+          break;
+        }
+        case 'flame':
+          addEnergy(oppIdx, -1);
+          addLog(`🔥 烈焰斩：P${oppIdx} 损失 1 能量`, 'skill');
+          break;
+        case 'cat':
+          p.mindRead = true;
+          addLog(`🔮 读心术：P${pIdx} 将预知对手下一手`, 'skill');
+          break;
+      }
+      renderAllUI();
+
+      // 寒冰法师冰墙可能直接阻挡，不会立即结束回合
+      // 使用技能不推进回合
+    }
+
+    // --- 终极技能 ---
+    function useUltimateSkill(pIdx) {
+      const p = state.players[pIdx - 1];
+      if (p.energy < ENERGY_MAX || state.currentPlayer !== pIdx || state.phase !== 'PLAYING' || state.rpsLock) return;
+      p.energy = 0;
+      const oppIdx = pIdx === 1 ? 2 : 1;
+      const opp = state.players[oppIdx - 1];
+      addLog(`⚡⚡ P${pIdx} · ${p.hero.name} 释放 终极技 ${p.hero.ultimate.name}`, 'ultimate');
+      Audio.play('skill-ultimate');
+      triggerSkillFlash(p.hero.id);
+      triggerShake();
+
+      switch (p.hero.id) {
+        case 'wind': {
+          const newPos = Math.min(BOARD_SIZE - 1, opp.position + 3);
+          p.position = newPos;
+          addLog(`💨 疾风突袭：传送至对手前方 3 格 · 格 ${newPos}`, 'ultimate');
+          highlightCell(newPos);
+          updatePiecePositions();
+          break;
+        }
+        case 'shadow': {
+          const tmp = p.position;
+          p.position = opp.position;
+          opp.position = tmp;
+          addLog(`🗿 暗影置换：P${pIdx} 与 P${oppIdx} 位置互换！`, 'ultimate');
+          highlightCell(p.position);
+          updatePiecePositions();
+          break;
+        }
+        case 'ice':
+          opp.frozen = true;
+          p.extraTurn = true;
+          addLog(`❄ 暴风雪：P${oppIdx} 被冻结，P${pIdx} 获得额外行动`, 'ultimate');
+          break;
+        case 'flame': {
+          const from = p.position + 1;
+          const to = Math.min(BOARD_SIZE - 2, p.position + 3);
+          let destroyed = 0;
+          for (let i = from; i <= to; i++) {
+            if (state.board[i] && state.board[i].type !== 'normal' && !state.board[i].destroyed) {
+              state.board[i].destroyed = true;
+              const cellEl = document.getElementById(`cell-${i}`);
+              if (cellEl) {
+                cellEl.style.filter = 'grayscale(1) brightness(0.5)';
+                if (cellEl.textContent.replace(/\s|\d/g, '') && !cellEl.classList.contains('finish')) {
+                  cellEl.innerHTML = '<span style="color:#999">💥</span>';
+                }
+              }
+              destroyed++;
+            }
+          }
+          addLog(`☄️ 陨石冲击：摧毁前方 ${to - from + 1} 格内 ${destroyed} 个特殊格，前进 2 步`, 'ultimate');
+          movePlayer(pIdx, 2, { allowFlameTrail: true });
+          break;
+        }
+        case 'cat': {
+          const layer = Math.floor(p.position / 10);
+          const layerStart = layer * 10;
+          p.position = layerStart;
+          p.phantomActive = true;
+          addLog(`👻 幻影分身：退回到第 ${layer + 1} 层起点（格 ${layerStart}），下一次 RPS 无论输赢都前进`, 'ultimate');
+          highlightCell(layerStart);
+          updatePiecePositions();
+          break;
+        }
+      }
+
+      renderAllUI();
+      if (checkWin()) return;
+      // 终极技能本身不结束回合，玩家还需出拳（或者作为"行动"）
+    }
+
+    // --- 回合推进 ---
+    function endTurn(progressTurn) {
+      const curIdx = state.currentPlayer;
+      const cur = state.players[curIdx - 1];
+
+      // 检查胜利
+      if (checkWin()) return;
+
+      // 寒冰法师被动：对对手施加 -1 步减益，下一次对手出拳获胜时应用
+      // (已在 applyRoundResult 中标记 stepDebuff。应用位置：下一次对手获胜时)
+      // 我们采用简单方式：opp.stepDebuff 让对手下次获胜步数 -1
+      // 在 movePlayer 之前不好判断，故改为在获胜时处理：
+      // 由于已在获胜处统一累加 steps，我们在 movePlayer 前加一个"步数减益"
+      // 简化处理：当 stepDebuff 为 true，下次获胜 movePlayer 传入 steps-1
+      // —— 在 playRound 之后：
+      // 这里我们用一个标记字段处理（见 applyRoundResult）
+
+      if (cur.extraTurn) {
+        cur.extraTurn = false;
+        addLog(`⏩ P${curIdx} 获得额外行动回合`, 'special');
+        renderAllUI();
+        return;
+      }
+
+      // 推进回合
+      state.currentPlayer = curIdx === 1 ? 2 : 1;
+      if (progressTurn) state.turnCount++;
+      addLog(`——— 回合 ${state.turnCount} · 轮到 P${state.currentPlayer} ———`, 'system');
+      renderAllUI();
+    }
+
+    // --- 胜负判定 ---
+    function checkWin() {
+      for (let i = 0; i < 2; i++) {
+        if (state.players[i].position >= BOARD_SIZE - 1) {
+          state.phase = 'GAME_OVER';
+          showResult(i + 1);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function showResult(winnerIdx) {
+      const winP = state.players[winnerIdx - 1];
+      const loseP = state.players[winnerIdx === 1 ? 1 : 0];
+      document.getElementById('result-title').textContent = `P${winnerIdx} 胜利！`;
+      document.getElementById('result-title').className = 'result-title victory';
+      document.getElementById('result-crown').textContent = winP.hero.icon;
+      document.getElementById('result-subtitle').textContent =
+        `共经历 ${state.turnCount} 回合 · ${winP.hero.name} 以 ${winP.position} vs ${loseP.position} 战胜 ${loseP.hero.name}`;
+      const heroesEl = document.getElementById('result-heroes');
+      heroesEl.innerHTML = `
+        <span style="color:${winP.hero.color}; font-weight:700;">${winP.hero.icon} ${winP.hero.name}</span>
+        <span class="vs">战 胜</span>
+        <span style="color:${loseP.hero.color}; opacity:0.75;">${loseP.hero.icon} ${loseP.hero.name}</span>
+      `;
+      showView('result-view');
+      document.getElementById('btn-pause').style.display = 'none';
+      addLog(`🏆 P${winnerIdx} · ${winP.hero.name} 登顶命运之塔，赢得命运对决！`, 'ultimate');
+      // 播放胜利音乐（BGM 切换为 victory）
+      Audio.startBGM('victory');
+      Audio.play('victory');
+      // 记录战绩（假设 P1 是玩家）
+      recordGame(winnerIdx === 1, state.turnCount);
+    }
+
+    // --- 重开 / 返回 ---
+    function restartGame() {
+      // 保留英雄选择
+      confirmHeroes();
+    }
+
+    function backToMenu() {
+      state.phase = 'MENU';
+      state.selectedHeroes = [null, null];
+      document.getElementById('btn-pause').style.display = 'none';
+      Audio.startBGM('menu');
+      showView('menu-view');
+    }
+
+    // --- 日志 ---
+    function addLog(msg, type = '') {
+      const log = document.getElementById('game-log');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + type;
+      const tag = document.createElement('span');
+      tag.className = 'turn-tag';
+      tag.textContent = `[T${state.turnCount}]`;
+      entry.appendChild(tag);
+      entry.appendChild(document.createTextNode(msg));
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // --- 规则弹窗 ---
+    function showRules() {
+      alert(
+`【《螺旋契约 · 命运对决》规则】
+
+◆ 棋盘：三层螺旋（30 格）
+  第一层：起步热身 · 第二层：博弈核心 · 第三层：冲刺决胜
+
+◆ 对战：石头 · 剪刀 · 布
+  石头 胜 剪刀：前进 0 步，但 +1 能量
+  剪刀 胜 布  ：前进 2 步
+  布   胜 石头：前进 5 步
+  平局：双方原地不动（暗影刺客被动除外）
+
+◆ 能量系统（上限 5）：
+  · 获胜 +1，石头胜再 +1
+  · 踩能量泉 +2
+  · 满能量可释放「终极技能」
+  · 消耗 1 能量可释放「小技能」
+
+◆ 特殊格：
+  💎 能量泉：+2 能量
+  ⚡ 加速格：下次获胜步数翻倍
+  🕳️ 陷阱格：后退 1 步，损失 1 能量
+  🌫️ 迷雾格：下一轮盲选
+  🌀 传送格：跃迁至下一层入口
+  🔄 回溯格：弹回当前层起点
+
+◆ 胜利：率先抵达第 29 格（终点）的玩家获胜
+
+◆ 英雄选择：5 位英雄各具特色，小技能与终极技能完全不同，
+  请善用组合策略！`
+      );
+    }
+
+    // --- 初始化渲染 ---
+    // 页面加载完成后，菜单视图默认激活，不做额外处理
+
+    // ============================================================
+    // 音频系统：程序化生成 BGM + 音效（Web Audio API，零资源依赖）
+    // ============================================================
+    const Audio = (function() {
+      let ctx = null;
+      let bgmMaster = null;   // BGM 总音量节点
+      let sfxMaster = null;   // SFX 总音量节点
+      let bgmGain = 0.45;
+      let sfxGain = 0.65;
+      let bgmOn = true;
+      let sfxOn = true;
+      let bgmNodes = [];      // 保存当前 BGM 相关节点，用于停止
+      let bgmTimer = null;
+      let currentScene = 'menu'; // menu / battle / result
+
+      function ensureCtx() {
+        if (ctx) return;
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        bgmMaster = ctx.createGain();
+        bgmMaster.gain.value = bgmGain;
+        bgmMaster.connect(ctx.destination);
+        sfxMaster = ctx.createGain();
+        sfxMaster.gain.value = sfxGain;
+        sfxMaster.connect(ctx.destination);
+      }
+
+      function resume() {
+        ensureCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+      }
+
+      // --- BGM 生成器 ---
+      // 三首场景 BGM：menu（神秘）、battle（紧张）、result（胜利/失败）
+      // 用低频持续音 + 高层琶音 + 偶尔打击，循环 8 小节
+
+      function noteToFreq(note) {
+        // note: MIDI 编号，60 = 中央C
+        return 440 * Math.pow(2, (note - 69) / 12);
+      }
+
+      function createTone(freq, type, duration, startOffset, dest, volume = 0.15) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, ctx.currentTime + startOffset);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + startOffset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + duration);
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start(ctx.currentTime + startOffset);
+        osc.stop(ctx.currentTime + startOffset + duration + 0.05);
+        return { osc, gain };
+      }
+
+      function startBGM(scene) {
+        ensureCtx();
+        stopBGM();
+        currentScene = scene;
+        if (!bgmOn) return;
+
+        // 不同场景用不同的音阶/节奏
+        const scales = {
+          menu:   [48, 51, 55, 58, 60, 63, 67, 70, 72], // 小调五声 + 扩展
+          battle: [45, 48, 51, 55, 57, 60, 63, 67, 69], // 更紧张
+          victory:[52, 55, 59, 62, 64, 67, 71, 74, 76], // 大调，明亮
+          defeat: [43, 46, 48, 51, 55, 58, 60, 63, 67]  // 低沉
+        };
+        const scale = scales[scene] || scales.menu;
+
+        const tempo = scene === 'battle' ? 0.32 : 0.5; // 每拍秒数
+        const barLen = 8 * tempo; // 8 拍为 1 小节，循环 4 小节
+        const totalLen = 4 * barLen;
+
+        function loopBar() {
+          if (!bgmOn || currentScene !== scene) return;
+          const scale = scales[scene] || scales.menu;
+
+          // 低音持续
+          const root = scale[0];
+          createTone(noteToFreq(root), 'sine', totalLen * 0.95, 0, bgmMaster, 0.06);
+          createTone(noteToFreq(root + 12), 'sine', totalLen * 0.95, 0, bgmMaster, 0.03);
+
+          // 三和弦中声部（每小节变化）
+          for (let bar = 0; bar < 4; bar++) {
+            const chordRoot = scale[bar * 2 % scale.length];
+            const chord = [chordRoot, chordRoot + 4, chordRoot + 7];
+            chord.forEach(n => {
+              createTone(noteToFreq(n + 12), 'triangle', barLen * 0.9, bar * barLen, bgmMaster, 0.04);
+            });
+          }
+
+          // 高层琶音
+          for (let i = 0; i < totalLen / tempo; i++) {
+            if (Math.random() < (scene === 'battle' ? 0.7 : 0.5)) {
+              const n = scale[Math.floor(Math.random() * scale.length)] + 24;
+              createTone(noteToFreq(n), 'sine', tempo * 0.8, i * tempo, bgmMaster, 0.035);
+            }
+          }
+
+          // 打击（低频 noise 做底鼓）
+          for (let i = 0; i < totalLen / tempo; i += 2) {
+            createKick(i * tempo);
+          }
+
+          bgmTimer = setTimeout(loopBar, totalLen * 1000);
+        }
+
+        function createKick(startOffset) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(120, ctx.currentTime + startOffset);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + startOffset + 0.12);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + startOffset);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startOffset + 0.15);
+          osc.connect(gain);
+          gain.connect(bgmMaster);
+          osc.start(ctx.currentTime + startOffset);
+          osc.stop(ctx.currentTime + startOffset + 0.2);
+        }
+
+        loopBar();
+      }
+
+      function stopBGM() {
+        if (bgmTimer) { clearTimeout(bgmTimer); bgmTimer = null; }
+        // 简单停止：把 master 快速降到 0
+        if (bgmMaster) {
+          bgmMaster.gain.cancelScheduledValues(ctx.currentTime);
+          bgmMaster.gain.setValueAtTime(bgmMaster.gain.value, ctx.currentTime);
+          bgmMaster.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+          setTimeout(() => {
+            if (bgmMaster) bgmMaster.gain.value = bgmOn ? bgmGain : 0;
+          }, 350);
+        }
+        currentScene = '';
+      }
+
+      function toggleBGM() {
+        bgmOn = !bgmOn;
+        const btn = document.getElementById('btn-bgm');
+        if (btn) btn.style.opacity = bgmOn ? '1' : '0.35';
+        if (bgmOn) {
+          resume();
+          startBGM(currentScene || 'menu');
+        } else {
+          stopBGM();
+        }
+        saveSettings();
+      }
+
+      function toggleSFX() {
+        sfxOn = !sfxOn;
+        const btn = document.getElementById('btn-sfx');
+        if (btn) btn.style.opacity = sfxOn ? '1' : '0.35';
+        saveSettings();
+      }
+
+      function setBGMVol(v) {
+        bgmGain = v / 100;
+        const el = document.getElementById('bgm-val');
+        if (el) el.textContent = v;
+        if (bgmMaster) bgmMaster.gain.value = bgmOn ? bgmGain : 0;
+        saveSettings();
+      }
+
+      function setSFXVol(v) {
+        sfxGain = v / 100;
+        const el = document.getElementById('sfx-val');
+        if (el) el.textContent = v;
+        if (sfxMaster) sfxMaster.gain.value = sfxOn ? sfxGain : 0;
+        saveSettings();
+      }
+
+      // --- 音效 ---
+      function play(type) {
+        if (!sfxOn) return;
+        ensureCtx();
+        resume();
+
+        switch(type) {
+          case 'click':
+            shortBeep(800, 'square', 0.05, 0.1);
+            break;
+          case 'hover':
+            shortBeep(1200, 'sine', 0.04, 0.05);
+            break;
+          case 'rps-win':
+            sequence([600, 800, 1100], 0.08, 'sine', 0.12);
+            break;
+          case 'rps-lose':
+            sequence([500, 350, 250], 0.1, 'sawtooth', 0.1);
+            break;
+          case 'rps-draw':
+            shortBeep(600, 'triangle', 0.2, 0.1);
+            break;
+          case 'skill-small':
+            sequence([400, 700, 1000], 0.06, 'sine', 0.12);
+            break;
+          case 'skill-ultimate':
+            // 上升琶音 + 低频冲击
+            sequence([200, 300, 450, 650, 900, 1200], 0.08, 'sawtooth', 0.15);
+            setTimeout(() => shortBeep(80, 'sine', 0.3, 0.2), 300);
+            break;
+          case 'energy-up':
+            shortBeep(1500, 'sine', 0.1, 0.08);
+            break;
+          case 'energy-full':
+            sequence([800, 1200, 1600], 0.07, 'sine', 0.12);
+            break;
+          case 'special-cell':
+            shortBeep(1000, 'triangle', 0.15, 0.1);
+            break;
+          case 'trap':
+            shortBeep(200, 'sawtooth', 0.2, 0.12);
+            break;
+          case 'victory':
+            sequence([523, 659, 784, 1046], 0.15, 'sine', 0.18);
+            setTimeout(() => sequence([659, 784, 1046, 1318], 0.12, 'triangle', 0.15), 600);
+            break;
+          case 'defeat':
+            sequence([400, 350, 300, 250], 0.2, 'sawtooth', 0.12);
+            break;
+          case 'countdown':
+            shortBeep(600, 'square', 0.08, 0.08);
+            break;
+          case 'toast':
+            shortBeep(1400, 'sine', 0.06, 0.06);
+            break;
+        }
+      }
+
+      function shortBeep(freq, type, duration, volume) {
+        if (!sfxMaster) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(sfxMaster);
+        osc.start();
+        osc.stop(ctx.currentTime + duration + 0.02);
+      }
+
+      function sequence(freqs, interval, type, volume) {
+        freqs.forEach((f, i) => {
+          setTimeout(() => shortBeep(f, type, interval * 1.5, volume), i * interval * 1000);
+        });
+      }
+
+      return {
+        init: ensureCtx,
+        resume,
+        startBGM,
+        stopBGM,
+        toggleBGM,
+        toggleSFX,
+        setBGMVol,
+        setSFXVol,
+        play,
+        isBGMOn: () => bgmOn,
+        isSFXOn: () => sfxOn
+      };
+    })();
+
+    // ============================================================
+    // 设置系统（持久化到 localStorage）
+    // ============================================================
+    const Settings = {
+      data: {
+        bgmVol: 45,
+        sfxVol: 65,
+        bgmOn: true,
+        sfxOn: true,
+        difficulty: 'normal',
+        animSpeed: 'normal',
+        shake: true,
+        stats: { wins: 0, games: 0, bestTurns: null }
+      },
+      load() {
+        try {
+          const raw = localStorage.getItem('spiral-covenant-settings');
+          if (raw) this.data = Object.assign(this.data, JSON.parse(raw));
+        } catch(e) {}
+      },
+      save() {
+        try {
+          localStorage.setItem('spiral-covenant-settings', JSON.stringify(this.data));
+        } catch(e) {}
+      }
+    };
+
+    Settings.load();
+
+    function saveSettings() { Settings.save(); }
+
+    function openSettings() {
+      document.getElementById('settings-modal').classList.add('active');
+      updateStatsUI();
+      Audio.play('click');
+    }
+
+    function closeSettings() {
+      document.getElementById('settings-modal').classList.remove('active');
+      Audio.play('click');
+    }
+
+    // 应用初始设置
+    function applySettings() {
+      const d = Settings.data;
+      // 音量
+      const bgmEl = document.getElementById('bgm-vol');
+      const sfxEl = document.getElementById('sfx-vol');
+      const bgmVal = document.getElementById('bgm-val');
+      const sfxVal = document.getElementById('sfx-val');
+      if (bgmEl) bgmEl.value = d.bgmVol;
+      if (sfxEl) sfxEl.value = d.sfxVol;
+      if (bgmVal) bgmVal.textContent = d.bgmVol;
+      if (sfxVal) sfxVal.textContent = d.sfxVol;
+      Audio.setBGMVol(d.bgmVol);
+      Audio.setSFXVol(d.sfxVol);
+      if (!d.bgmOn) Audio.toggleBGM();
+      if (!d.sfxOn) Audio.toggleSFX();
+      // 难度
+      setDifficultyUI(d.difficulty);
+      // 动画速度
+      setAnimSpeedUI(d.animSpeed);
+      // 震屏
+      const t = document.getElementById('toggle-shake');
+      if (t) t.classList.toggle('on', d.shake);
+    }
+
+    function setDifficulty(diff, el) {
+      Settings.data.difficulty = diff;
+      Settings.save();
+      setDifficultyUI(diff);
+      Audio.play('click');
+    }
+
+    function setDifficultyUI(diff) {
+      document.querySelectorAll('.diff-select').forEach(group => {
+        group.querySelectorAll('.diff-btn').forEach(b => {
+          const txt = b.textContent.trim();
+          const map = { '简单': 'easy', '普通': 'normal', '困难': 'hard' };
+          b.classList.toggle('active', map[txt] === diff);
+        });
+      });
+    }
+
+    function setAnimSpeed(speed, el) {
+      Settings.data.animSpeed = speed;
+      Settings.save();
+      setAnimSpeedUI(speed);
+      Audio.play('click');
+    }
+
+    function setAnimSpeedUI(speed) {
+      // 找到第二组 diff-select（动画速度那行）
+      const rows = document.querySelectorAll('.setting-row .diff-select');
+      if (rows.length >= 2) {
+        const group = rows[1];
+        group.querySelectorAll('.diff-btn').forEach(b => {
+          const txt = b.textContent.trim();
+          const map = { '慢': 'slow', '正常': 'normal', '快': 'fast' };
+          b.classList.toggle('active', map[txt] === speed);
+        });
+      }
+    }
+
+    function toggleSetting(key, el) {
+      Settings.data[key] = !Settings.data[key];
+      el.classList.toggle('on', Settings.data[key]);
+      Settings.save();
+      Audio.play('click');
+    }
+
+    function getAnimSpeedMultiplier() {
+      const s = Settings.data.animSpeed;
+      return s === 'slow' ? 1.5 : s === 'fast' ? 0.55 : 1;
+    }
+
+    // ============================================================
+    // 战绩统计
+    // ============================================================
+    function recordGame(isWin, turnCount) {
+      const s = Settings.data.stats;
+      s.games++;
+      if (isWin) s.wins++;
+      if (s.bestTurns === null || turnCount < s.bestTurns) s.bestTurns = turnCount;
+      Settings.save();
+      updateStatsUI();
+    }
+
+    function updateStatsUI() {
+      const s = Settings.data.stats;
+      const wins = s.wins || 0;
+      const games = s.games || 0;
+      document.getElementById('stat-wins').textContent = wins;
+      document.getElementById('stat-games').textContent = games;
+      document.getElementById('stat-display').textContent = `${wins} / ${games}`;
+      document.getElementById('stat-winrate').textContent =
+        games > 0 ? Math.round(wins / games * 100) + '%' : '0%';
+      document.getElementById('stat-best').textContent =
+        s.bestTurns !== null ? s.bestTurns + ' T' : '—';
+    }
+
+    function resetStats() {
+      if (!confirm('确定重置所有战绩统计？')) return;
+      Settings.data.stats = { wins: 0, games: 0, bestTurns: null };
+      Settings.save();
+      updateStatsUI();
+      Audio.play('click');
+    }
+
+    // ============================================================
+    // 暂停 / 继续
+    // ============================================================
+    function togglePause() {
+      const overlay = document.getElementById('pause-overlay');
+      const showing = overlay.classList.contains('active');
+      if (showing) {
+        overlay.classList.remove('active');
+        if (state.phase === 'PLAYING') {
+          Audio.startBGM('battle');
+        }
+      } else {
+        if (state.phase !== 'PLAYING' && state.phase !== 'ROUND_RESULT') return;
+        overlay.classList.add('active');
+        Audio.stopBGM();
+      }
+      Audio.play('click');
+    }
+
+    function exitToMenu() {
+      document.getElementById('pause-overlay').classList.remove('active');
+      state.phase = 'MENU';
+      state.selectedHeroes = [null, null];
+      document.getElementById('btn-pause').style.display = 'none';
+      Audio.startBGM('menu');
+      showView('menu-view');
+    }
+
+    // ============================================================
+    // 辅助：Toast / 震屏 / 技能闪光
+    // ============================================================
+    function showToast(msg, duration = 1600) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      Audio.play('toast');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    function triggerShake() {
+      if (!Settings.data.shake) return;
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 400);
+    }
+
+    function triggerSkillFlash(heroId) {
+      const el = document.getElementById('skill-flash');
+      const colorMap = { wind: 'wind', shadow: 'shadow', ice: 'ice', flame: 'fire', cat: 'cat' };
+      el.className = 'skill-flash ' + (colorMap[heroId] || 'fire');
+      // 重启动画
+      el.classList.remove('animate');
+      void el.offsetWidth;
+      el.classList.add('animate');
+    }
+
+    function spawnParticle(emoji, x, y, count = 5) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'floating-particle';
+        p.textContent = emoji;
+        p.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
+        p.style.top = y + 'px';
+        p.style.fontSize = (16 + Math.random() * 16) + 'px';
+        p.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1400);
+      }
+    }
+
+    // ============================================================
+    // 升级 AI：根据难度调整策略
+    // ============================================================
+    function getDifficulty() {
+      return Settings.data.difficulty || 'normal';
+    }
+
+    // 覆盖/扩展 aiChoose
+    const origAIChoose = aiChoose;
+    function aiChooseSmart(oppIdx) {
+      const p = state.players[oppIdx - 1];
+      const diff = getDifficulty();
+      const choices = ['rock', 'scissors', 'paper'];
+      const valid = p.poisonNoPaper ? choices.filter(c => c !== 'paper') : choices;
+
+      if (diff === 'easy') {
+        // 随机偏向出石头（新手友好）
+        if (Math.random() < 0.5) return 'rock';
+        return valid[Math.floor(Math.random() * valid.length)];
+      }
+
+      if (diff === 'hard') {
+        // 困难：如果对方能量满了，就用克制对方常用出法的策略
+        // 简单实现：有较高概率出剪刀（进攻型）
+        // 如果对方能量 >= 3，更可能出布来防止对方石头攒能量
+        const curP = state.players[state.currentPlayer - 1];
+        if (curP.energy >= 3) {
+          // 出布，不让对方用石头攒能量
+          if (Math.random() < 0.5 && valid.includes('paper')) return 'paper';
+        }
+        if (curP.position > p.position + 5) {
+          // 对手领先较多，冒险出布追赶
+          if (Math.random() < 0.6 && valid.includes('paper')) return 'paper';
+        }
+        return valid[Math.floor(Math.random() * valid.length)];
+      }
+
+      // normal
+      return origAIChoose ? origAIChoose(oppIdx) : valid[Math.floor(Math.random() * valid.length)];
+    }
+
+    // 覆盖原 aiChoose
+    // (将在后面重新注入)
+
+    // ============================================================
+    // 页面启动
+    // ============================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      applySettings();
+      updateStatsUI();
+      // 首次用户交互后启动 BGM
+      const start = () => {
+        Audio.resume();
+        Audio.startBGM('menu');
+        document.removeEventListener('click', start);
+        document.removeEventListener('keydown', start);
+      };
+      document.addEventListener('click', start);
+      document.addEventListener('keydown', start);
+    });
+  </script>
+</body>
+</html>
+  
